@@ -1,0 +1,122 @@
+openapi: 3.0.0
+info:
+  title: Tasks API
+  description: This is a taksk  API
+  contact:
+    email: you@your-company.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+- url: https://virtserver.swaggerhub.com/rameshchipilla/TaskAPI/1.0.0
+  description: SwaggerHub API Auto Mocking
+tags:
+- name: admins
+  description: Secured Admin-only calls
+- name: developers
+  description: Operations available to regular developers
+paths:
+  /tasks:
+    get:
+      tags:
+      - developers
+      summary: searches tasks from the database
+      description: "By passing in the appropriate options, you can search for\navailable\
+        \ task in the system\n"
+      operationId: searchTask
+      parameters:
+      - name: searchString
+        in: query
+        description: pass an optional search string for looking up task
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: projectName
+        in: query
+        description: pass project name to lookup a task from project
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: search results matching criteria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+                x-content-type: application/json
+        "400":
+          description: bad input parameter
+      x-swagger-router-controller: Developers
+    post:
+      tags:
+      - developers
+      summary: adds task
+      description: Adds a task to the system
+      operationId: addTask
+      requestBody:
+        description: Inventory item to add
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Task'
+      responses:
+        "201":
+          description: item created
+        "400":
+          description: "invalid input, object invalid"
+        "409":
+          description: an existing item already exists
+      x-swagger-router-controller: Developers
+components:
+  schemas:
+    Task:
+      required:
+      - name
+      - priority
+      type: object
+      properties:
+        name:
+          type: string
+          example: Conduct AWS Session
+        priority:
+          type: string
+          example: High
+          enum:
+          - High
+          - Medium
+          - Low
+        completeDate:
+          type: string
+          format: date-time
+          example: 2016-08-29T09:12:33.001Z
+        project:
+          $ref: '#/components/schemas/Project'
+      example:
+        name: Conduct AWS Session
+        project:
+          name: AWS Demo
+          description: Project to track tasks for AWS Demo
+        priority: High
+        completeDate: 2016-08-29T09:12:33.001Z
+    Project:
+      required:
+      - name
+      type: object
+      properties:
+        name:
+          type: string
+          example: AWS Demo
+        description:
+          type: string
+          example: Project to track tasks for AWS Demo
+      example:
+        name: AWS Demo
+        description: Project to track tasks for AWS Demo

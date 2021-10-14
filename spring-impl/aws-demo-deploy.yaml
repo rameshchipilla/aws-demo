@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aws-demo-deployment
+  labels:
+    app: aws-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aws-demo
+  template:
+    metadata:
+      labels:
+        app: aws-demo
+    spec:
+      containers:
+      - name: aws-demo-api
+        image: rbchipilla/aws-demo
+        resources: {}          
+        ports:
+        - containerPort: 8081
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aws-demo-api-service
+  labels:
+    app: aws-demo-api-service
+spec:
+  selector:
+    app: aws-demo
+  ports:
+  - port: 8080
+    targetPort: 8081
+    name: 8080-8081
+    protocol: TCP 
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aws-demo-configmap
+data:
+  mongo-db-url: aws-demo-db-service
+---  
+apiVersion: v1
+kind: Secret
+metadata:
+  name: aws-demo-secret
+type: Opaque
+data:
+  mongo-db-username: WFhY
+  mongo-db-password: WFhY 
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: aws-demo-ingress
+spec:
+  rules:
+  #- host: <Host>
+  - http:
+      paths:
+      - pathType: Prefix
+        path: "/rameshchipilla/TaskAPI/1.0.0/tasks"
+        backend:
+          service: 
+            name: aws-demo-api-service
+            port: 
+              number: 8080  
